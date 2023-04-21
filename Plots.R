@@ -7,7 +7,7 @@ library(forcats)
 
 data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "WeedScience", col_names = TRUE)
 
-#spectal plot
+#### spectal plot ####
 data.long <-melt(data, id.vars="Wavelength")
 
 plt <- ggplot(data.long) + 
@@ -17,8 +17,9 @@ plt <- ggplot(data.long) +
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
+#### end ####
 
-#box plot
+#### box plot ####
 
 plt <- ggplot(data) + 
   geom_boxplot(aes(fct_inorder(Genotype), Yield, fill = Genotype), show.legend = FALSE) + 
@@ -27,8 +28,9 @@ plt <- ggplot(data) +
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) 
+#### end ####
 
-#scatterplot
+#### scatterplot ####
 
 plt <- ggplot(data) + 
   geom_point(aes(Maturity, Yield, color = Genotype), show.legend = FALSE) + 
@@ -37,8 +39,9 @@ plt <- ggplot(data) +
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) 
+#### end ####
 
-#heatmap
+#### heatmap ####
 
 plt <- ggplot(data) + 
   geom_tile(aes(Rows, Column, fill= Yield)) +
@@ -50,7 +53,9 @@ plt <- ggplot(data) +
         axis.line = element_blank()) +
   scale_fill_gradient(low="white", high="red")
 
-#line plot
+#### end ####
+
+#### line plot ####
 
 seldata <- data %>% 
   select(c(Name, DAT_1, DAT_3, DAT_7, DAT_10, DAT_14, DAT_21))
@@ -66,13 +71,16 @@ seldata.summary <- seldata.long %>%
 
 
 plt <- ggplot(seldata.summary) + 
-  geom_line(aes(variable, value, group=Name, color=Name)) +
-  labs(x="Active Ingredient", y ="VR") + 
+  geom_line(aes(fct_inorder(variable), value, group=Name, color=Name)) +
+  geom_point(aes(variable, value, group=Name, color=Name)) +
+  geom_errorbar(aes(x = variable, ymin = value - sd, ymax = value + sd, color=Name), width = 0.1,  alpha=0.5) +
+  labs(x="Days after Treatment", y ="VR", color = "Active Ingredient") + 
   theme(text = element_text(size = 14),
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
 
+#### end ####
 
 ggsave('plot.svg', plot = plt, width = 12, height = 7, units = "in", dpi = 600, device = svglite)
 
