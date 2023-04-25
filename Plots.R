@@ -10,6 +10,7 @@ library(GGally)
 library(viridis)
 library(plotly)
 library(metR)
+library(spatialEco)
 
 
 data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "Volcano", col_names = TRUE)
