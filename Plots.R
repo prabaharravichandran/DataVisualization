@@ -29,8 +29,10 @@ plt <- ggplot(data.long) +
 
 #### box plot ####
 
-plt <- ggplot(data) + 
-  geom_boxplot(aes(fct_inorder(Genotype), Yield, fill = Genotype), show.legend = FALSE) + 
+sepdata <- melt(data, id = c("class"))
+
+plt <- ggplot(sepdata) + 
+  geom_boxplot(aes(fct_inorder(class), value, fill = variable), show.legend = FALSE) + 
   labs(x="Genotype", y ="Yield") + 
   theme(text = element_text(size = 20),
         panel.grid.major = element_blank(), 
@@ -39,6 +41,7 @@ plt <- ggplot(data) +
         panel.background = element_blank(), 
         axis.line.x = element_line(colour = "black"))
 
+plt
 outlier <- ggplot_build(plt)[["data"]][[1]][["outliers"]]
 names(outlier) <- levels(factor(fct_inorder(data$Genotype)))
 tidyout <- purrr::map_df(outlier, tibble::as_tibble, .id = "Genotype")
@@ -103,7 +106,7 @@ plt <- ggplot(seldata.summary) +
 #### end ####
 
 #### corr plot ####
-seldata <- na.omit(data %>% select(c(-"Name")))
+seldata <- na.omit(data %>% select(c(-"class")))
 cordata <- melt(round(cor(seldata), 2))
 plt <- ggplot(cordata, aes(x=Var1, y=Var2, fill = value)) +
   geom_tile(show.legend = FALSE) +
@@ -121,6 +124,7 @@ plt <- ggplot(cordata, aes(x=Var1, y=Var2, fill = value)) +
             size = 6) +
   #scale_fill_gradient(low="gold", high="deepskyblue", limits = c(-1, +1)) +
   coord_equal()
+plt
 #### end ####
 
 #### bar plot - with title ####
@@ -263,9 +267,24 @@ plt
 
 #### Seperability ####
 seldata <-as.data.frame(data %>% select(c(2:7)))
-classes <- data$class
+classes <- as.factor(data$class)
 sepdata <- melt(data, id = c("class"))
-spectral.separability(seldata, classes)
+tapply(sepdata$value, sepdata$class, summary) 
+sep <- melt(spectral.separability(seldata[,1], classes, jeffries.matusita = TRUE)*100/1.414214)
+plt <- ggplot(sep) + 
+  geom_tile(aes(Var1, Var2, fill= value)) +
+  labs(x="Columns", y ="Rows") + 
+  theme(text = element_text(size = 14),
+        panel.grid.major = element_blank(), 
+        #panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.title = element_blank(),
+        axis.line = element_blank()) +
+  scale_fill_viridis_c(option = "viridis") +
+  geom_text(aes(x = Var1, y = Var2, label = round(value, 2)), color = "black", 
+            #fontface = "bold",
+            size = 6) +
+  coord_equal()
 plt <- ggplot(sepdata, aes(x=value)) + 
   geom_density(aes(fill=class), alpha = 0.25) +
   theme(text = element_text(size = 20, family = "Roboto"), #Futura, Roboto, Helvetica
