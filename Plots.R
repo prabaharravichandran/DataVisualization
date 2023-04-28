@@ -13,7 +13,7 @@ library(metR)
 library(spatialEco)
 
 
-data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "MSI", col_names = TRUE)
+data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "Spec", col_names = TRUE)
 
 #### spectal plot ####
 data.long <-melt(data, id.vars="Wavelength")
@@ -395,6 +395,59 @@ plt <- ggplot(df, aes(Var1, Var2, z= value, colour=stat(level))) +
   )
 plt
 #### end #### 
+
+#### Histogram ####
+plt <- plot_ly(alpha = 0.6, nbinsx = 30)
+plt <- plt %>% add_histogram(data$M1, name = "first")
+plt <- plt %>% add_histogram(data$M2, name = "second")
+plt <- plt %>% layout(barmode = "stack")
+plt <- plt %>% layout(barmode = "overlay", 
+                      yaxis = list(title = "Frequency"),
+                      xaxis = list(title = "Values"))
+
+plt
+#### end ####
+
+#### Gauge chart ####
+
+plt <- plot_ly(
+  domain = list(x = c(0, 1), y = c(0, 1)),
+  value = 87,
+  gauge = list(
+    axis = list(range = list(NULL, 100), tickwidth = 1, tickcolor = "darkblue"),
+    bar = list(color = "red")
+  ),
+  title = list(text = "Classicication Accuracy (%)"),
+  type = "indicator",
+  mode = "gauge+number") 
+plt <- plt %>%
+  layout(margin = list(l=20,r=30))
+
+plt
+
+
+#### end ####
+
+#### Bullet chart ####
+plt <- plot_ly(
+  type = "indicator",
+  mode = "number+gauge+delta",
+  gauge = list(
+    shape = "bullet",
+    axis = list(range = list(NULL, 100), tickwidth = 1, tickcolor = "darkblue"),
+    bar = list(color = "red")
+  ),
+  delta = list(reference = 100),
+  value = 67,
+  domain = list(x = c(0, 1), y = c(0, 1)),
+  title= list(text = "Accuracy (%)"),
+  height = 150)
+plt <- plt %>%
+  layout(margin = list(l=200,r=30))
+
+plt
+
+#### end ####
 
 #SVG GGPlot plots
 ggsave('plot.svg', plot = plt, width = 12, height = 7, units = "in", dpi = 600, device = svglite)
