@@ -13,7 +13,7 @@ library(metR)
 library(spatialEco)
 
 
-data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "Spec", col_names = TRUE)
+data <- read_excel("./data/WheatBreedingSampleData.xlsx", sheet = "WeedScience", col_names = TRUE)
 
 #### spectal plot ####
 data.long <-melt(data, id.vars="Wavelength")
@@ -21,7 +21,7 @@ data.long <-melt(data, id.vars="Wavelength")
 plt <- ggplot(data.long) + 
   geom_line(aes(Wavelength, value, color=variable), show.legend = FALSE) +
   labs(x="Wavelength (nm)", y ="Absorbance") + 
-  theme(text = element_text(size = 14),
+  theme(text = element_text(size = 30),
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black"))
@@ -152,10 +152,19 @@ plt <- ggplot(data, aes(fct_inorder(Genotype), Yield, fill = Genotype)) +
 #### end ####
 
 #### Density plot ####
-seldata <- data %>% select(c("DAT_1", "DAT_3", "DAT_7", "DAT_10", "DAT_14", "DAT_21"))
-densdata <- melt(seldata)
-plt <- ggplot(densdata, aes(x=value)) + 
-  geom_density(aes(fill=variable), alpha = 0.25) +
+seldata <- data %>% filter(
+  #Location == "Lethbridge" & 
+    Crop == "Oats") %>% 
+  select(c("Location", "Trt", "DAT_1", "DAT_3", "DAT_7", "DAT_10", "DAT_14", "DAT_21", "DAT_24"))
+  
+densdata <- melt(seldata, id.vars = c("Location", "Trt"))
+
+plt <- ggplot(densdata, aes(x=value, fill = Location)) + 
+  geom_histogram(
+    aes(y=..count..), bins = 30
+  ) +
+  labs(x="Visual control rating (%)", y ="Count", caption = "Data Source: AAFC, 2023" ) +
+  #geom_density(alpha=.5) +
   theme(text = element_text(size = 20, family = "Roboto"), #Futura, Roboto, Helvetica
         panel.grid.major = element_blank(), 
         #panel.grid.minor = element_blank(),
@@ -166,9 +175,8 @@ plt <- ggplot(densdata, aes(x=value)) +
         plot.title = element_text(size = 32, face = "bold"),
         plot.subtitle = element_text(size = 16, face = "plain"),
         plot.title.position = "plot", 
-        plot.caption.position = "plot") +
-  facet_wrap(~variable, ncol = 3)
-
+        plot.caption.position = "plot")
+plt
 
 #### end ####
 
@@ -451,6 +459,9 @@ plt
 
 #SVG GGPlot plots
 ggsave('plot.svg', plot = plt, width = 12, height = 7, units = "in", dpi = 600, device = svglite)
+
+#PNG GGplot save
+ggsave('plot.png', plot = plt, width = 12, height = 7, units = "in", dpi = 600)
 
 #HTML Plotly plots
 htmlwidgets::saveWidget(plt, file = "plot.html")
